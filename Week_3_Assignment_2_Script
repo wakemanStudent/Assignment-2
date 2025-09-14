@@ -1,0 +1,86 @@
+"""
+iris_assignment.py
+Week 2 Assignment – Iris Dataset (Python)
+Reusable functions and variables for import.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn import datasets
+
+
+# ---------- Data Loader ----------
+def load_iris_df() -> pd.DataFrame:
+    """Load and return the iris dataset as a pandas DataFrame with renamed columns."""
+    iris = datasets.load_iris()
+    iris_df = pd.DataFrame(iris.data, columns=iris.feature_names)
+    iris_df["Species"] = pd.Categorical.from_codes(iris.target, iris.target_names)
+
+    return iris_df.rename(columns={
+        "sepal length (cm)": "Sepal.Length",
+        "sepal width (cm)": "Sepal.Width",
+        "petal length (cm)": "Petal.Length",
+        "petal width (cm)": "Petal.Width",
+    })
+
+
+# ---------- Analysis Functions ----------
+def get_shape(df: pd.DataFrame):
+    return df.shape
+
+
+def get_sub1(df: pd.DataFrame):
+    """First 9 rows + last row."""
+    return pd.concat([df.iloc[:9], df.iloc[[-1]]])
+
+
+def get_sub2(df: pd.DataFrame):
+    """Rows where Sepal.Width < 2.4, only selected columns."""
+    return df.loc[df["Sepal.Width"] < 2.4, ["Sepal.Length", "Sepal.Width", "Species"]]
+
+
+def get_vector(df: pd.DataFrame):
+    """100 if species is versicolor, else 0."""
+    return (df["Species"] == "versicolor").astype(int) * 100
+
+
+def sepal_width_stats(df: pd.DataFrame):
+    sw = df["Sepal.Width"].astype(float)
+    return {
+        "mean": sw.mean(),
+        "median": sw.median(),
+        "max": sw.max(),
+        "min": sw.min(),
+    }
+
+
+def loop_until_sum(df: pd.DataFrame, threshold: float = 100.0):
+    sw = df["Sepal.Width"].astype(float)
+    running_sum, loop_count = 0.0, 0
+    for v in sw:
+        running_sum += float(v)
+        loop_count += 1
+        if running_sum > threshold:
+            break
+    return {"loop_count": loop_count, "running_sum": running_sum}
+
+
+def cmtoin(x: float) -> float:
+    """Convert centimeters to inches."""
+    return x / 2.54
+
+
+def get_sepal_width_inches(df: pd.DataFrame):
+    return df["Sepal.Width"].astype(float).apply(cmtoin)
+
+
+def scatter_plot(df: pd.DataFrame):
+    """Generate a scatter plot of Sepal.Length vs Petal.Length."""
+    plt.figure()
+    plt.scatter(df["Sepal.Length"], df["Petal.Length"])
+    plt.xlabel("Sepal Length (cm)")
+    plt.ylabel("Petal Length (cm)")
+    plt.title("Iris: Sepal Length vs Petal Length")
+    plt.grid(True)
+    return plt.gcf()
